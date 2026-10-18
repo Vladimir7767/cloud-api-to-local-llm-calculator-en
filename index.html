@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Cloud API to Self-Hosted Local LLM Migration Cost Calculator Online</title>
+<meta name="description" content="Free professional AI infrastructure simulator for cloud migration. Estimate CAPEX for RTX 4090 or Mac Studio clusters, power cooling taxes, and TCO ROI.">
+<style>
+:root{--primary:#6366f1;--primary-hover:#4f46e5;--success:#10b981;--danger:#ef4444;--bg:#f8fafc;--card-bg:#ffffff;--text:#0f172a;--text-muted:#64748b;--border:#e2e8f0;--accent:#f59e0b;--purple:#8b5cf6;--slate:#334155}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{background:var(--bg);color:var(--text);padding:20px;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.wrapper{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:540px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05)}
+h1{font-size:21px;font-weight:700;margin-bottom:4px;text-align:center;letter-spacing:-0.025em}
+.subtitle{font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:20px}
+.live-meter{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:20px;text-align:center}
+.meter-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;letter-spacing:0.05em}
+.bar-container{background:var(--border);border-radius:20px;height:12px;width:100%;overflow:hidden;position:relative}
+.bar-fill{background:var(--primary);width:30%;height:100%;transition:all 0.4s ease}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--bg);padding:4px;border-radius:10px;margin-bottom:20px;border:1px solid var(--border)}
+.tab-btn{padding:10px 2px;background:none;border:none;border-radius:8px;font-size:11px;font-weight:700;color:var(--text-muted);cursor:pointer;transition:all 0.2s;text-align:center}
+.tab-btn.active{background:var(--card-bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.group{margin-bottom:16px}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text)}
+select,input[type="number"]{width:100%;padding:11px;border:1px solid var(--border);border-radius:10px;font-size:15px;background:#fff;color:var(--text);transition:border 0.2s}
+select:focus,input:focus{border-color:var(--primary);outline:none}
+input[type="range"]{width:100%;margin:8px 0;cursor:pointer}
+.range-val{font-size:14px;font-weight:700;color:var(--primary);float:right}
+.calc-btn{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;box-shadow:0 4px 6px -1px rgba(99,102,241,0.2);transition:background 0.2s}
+.calc-btn:hover{background:var(--primary-hover)}
+.skynet-box{background:#fee2e2;border:1px solid #fca5a5;border-radius:12px;padding:14px;margin-top:20px;display:none}
+.skynet-title{font-size:12px;font-weight:700;color:var(--danger);margin-bottom:6px;text-transform:uppercase;text-align:center;letter-spacing:0.05em}
+.results{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:20px;display:none}
+.res-title{font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-align:center;text-transform:uppercase;letter-spacing:0.05em}
+.res-row{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;border-bottom:1px dashed var(--border);align-items:center}
+.res-row:last-child{border-bottom:none}
+.res-val{font-weight:700;color:var(--primary);text-align:right;max-width:65%}
+.res-val.loss{color:var(--danger)}
+.partner-btn{display:block;width:100%;padding:11px;background:#fff;border:1px solid var(--purple);color:var(--purple);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;text-align:center;margin-top:12px;text-decoration:none}
+.partner-btn:hover{background:var(--purple);color:#fff}
+.seo-text{font-size:12px;color:var(--text-muted);margin-top:24px;text-align:justify;line-height:1.4;border-top:1px solid var(--border);padding-top:16px;display:none}
+</style>
+</head>
+<body>
+<div class="wrapper">
+<h1>Sovereign AI Server: Migration Audit</h1>
+<div class="subtitle">Total Cost of Ownership (TCO) Simulator for Cloud API Offshoring</div>
+
+<div class="live-meter">
+<div class="meter-label">Sovereignty Architecture Status: <span id="live-preview-zone">Initialization</span></div>
+<div class="bar-container"><div class="bar-fill" id="bar-fill"></div></div>
+</div>
+
+<div class="tabs">
+<button class="tab-btn active" onclick="switchTab('cloud', this)">Cloud Burn</button>
+<button class="tab-btn" onclick="switchTab('hardware', this)">Private Hardware</button>
+<button class="tab-btn" onclick="switchTab('risks', this)">Infra Taxes</button>
+</div>
+<!-- TAB 1: CLOUD BURN -->
+<div id="tab-cloud" class="tab-content active">
+<div class="group">
+<label for="cloud-spend">Current Monthly OpenAI / Anthropic Invoice ($)</label>
+<input type="number" id="cloud-spend" value="3000" min="1" max="1000000" oninput="updatePreview()">
+</div>
+<div class="group">
+<label for="cloud-growth">Projected Annual AI Traffic Growth (%) <span class="range-val" id="growth-val">50%</span></label>
+<input type="range" id="cloud-growth" min="0" max="300" value="50" step="10" oninput="document.getElementById('growth-val').innerText=this.value+'%'; updatePreview();">
+</div>
+</div>
+
+<!-- TAB 2: PRIVATE HARDWARE -->
+<div id="tab-hardware" class="tab-content">
+<div class="group">
+<label for="hardware-base">Sovereign Hardware Base</label>
+<select id="hardware-base" onchange="updatePreview()">
+<option value="rtx4090">NVIDIA RTX 4090 x4 Cluster (Local Node)</option>
+<option value="mac">Apple Mac Studio M3 Ultra x2 Cluster (192GB VRAM)</option>
+<option value="runpod">Dedicated Bare-Metal Cluster (RunPod / Vast.ai)</option>
+</select>
+</div>
+<div class="group">
+<label for="quantization-level">Quantization Bit-Depth (Model Compression) <span class="range-val" id="quant-val">INT4 (4-bit)</span></label>
+<select id="quantization-level" onchange="updatePreview()">
+<option value="int4">INT4 — Max Compression (~3% Accuracy Loss, 75% VRAM Savings)</option>
+<option value="int8">INT8 — Base Compression (~1% Accuracy Loss, 50% VRAM Savings)</option>
+<option value="fp16">FP16 — Unquantized (Native Accuracy, Requires Max VRAM)</option>
+</select>
+</div>
+</div>
+
+<!-- TAB 3: INFRA TAXES -->
+<div id="tab-risks" class="tab-content">
+<div class="group">
+<label for="devops-salary">Monthly Sysadmin / DevOps Allocation ($)</label>
+<input type="number" id="devops-salary" value="2000" min="0" max="50000" oninput="updatePreview()">
+</div>
+<div class="group">
+<label for="power-cost">Regional Electricity Cost (Per kWh in Cents $) <span class="range-val" id="power-val">12¢</span></label>
+<input type="range" id="power-cost" min="2" max="40" value="12" oninput="document.getElementById('power-val').innerText=this.value+'¢'; updatePreview();">
+</div>
+<div class="group">
+<label for="downtime-cost">Estimated Cost of 1-Hour Infrastructure Downtime ($)</label>
+<input type="number" id="downtime-cost" value="150" min="0" max="100000" oninput="updatePreview()">
+</div>
+</div>
+
+<button class="calc-btn" onclick="calculateAiMetrics()">Execute Migration Audit</button>
+
+<div class="results" id="results-box">
+<div class="results-title" style="display:none;"></div>
+<div class="res-title">Technical & Economic Justification (TEO)</div>
+<div class="res-row"><span>Required VRAM Allocation (Compressed):</span><span class="res-val" id="res-vram">0 GB</span></div>
+<div class="res-row"><span>Power & Cooling Infrastructure Tax (Monthly):</span><span class="res-val" id="res-power">$0</span></div>
+<div class="res-row"><span>Capital Expenditure for Hardware (CAPEX):</span><span class="res-val" id="res-capex">$0</span></div>
+<div class="res-row" id="payback-row" style="display:none;"><span>Hardware Amortization Horizon:</span><span class="res-val" id="res-payback" style="color:var(--purple)">0 months</span></div>
+<div class="res-row"><span>Net Infrastructure Savings (24-Month Horizon):</span><span class="res-val" id="res-savings" style="color:var(--success)">$0</span></div>
+<div class="res-row"><span>Sovereign Return on Investment (ROI):</span><span class="res-val" id="res-roi">0%</span></div>
+<a href="https://runpod.io" target="_blank" class="partner-btn" id="partner-link">🤖 Deploy Sovereign Bare-Metal Instance on RunPod</a>
+</div>
+
+<div class="skynet-box" id="skynet-container">
+<div class="skynet-title">🔮 Fault Tolerance Matrix & Emergency Breakdown Risks</div>
+<div class="res-row" style="border-bottom:none; color:#991b1b; font-size:12px; text-align:justify;"><span id="skynet-verdict">Execute migration audit to evaluate local hosting architectural security.</span></div>
+</div>
+
+<div id="ads" class="ad"><div id="container-e8c895e6c70ade8e4ef4a72354f42e97"></div></div>
+
+<div class="seo-text" id="seo-box">
+Our professional online cloud API to self-hosted local LLM migration cost calculator provides complete total cost of ownership (TCO) analytics for independent software ventures migrating away from centralized tech cartels (OpenAI fine-tuning, Anthropic Claude endpoints). The computational engine evaluates capital expenditure (CAPEX) for custom hardware configurations including NVIDIA RTX 4090 clusters and Apple Mac Studio M3 Ultra nodes against institutional managed API billings. Process real-time power and cooling utility taxes derived from processing chip thermal design power (TDP) in kWh alongside model quantization bit-depth limits (4-bit INT4, 8-bit INT8, FP16) to establish server amortization payback schedules and mitigate system downtime risks. Every computation compiles 100% locally inside your browser context.
+</div>
+</div>
+<script>
+let currentTab = 'cloud';
+
+// Server hardware constants (valid for late 2026 infrastructure)
+const hardwareSpecs = {
+  rtx4090: { capexUSD: 8500, vramGB: 96, tdpWatts: 1800, adminRequired: false }, // 4x RTX 4090 Rig
+  mac: { capexUSD: 14000, vramGB: 384, tdpWatts: 300, adminRequired: false },     // 2x Mac Studio Cluster
+  runpod: { capexUSD: 0, vramGB: 160, tdpWatts: 0, adminRequired: true }          // Bare-Metal Lease (CAPEX=0, Admin required)
+};
+
+const usdToFiat = { "\$": 1.00 };
+
+function switchTab(tabName, btn) {
+  currentTab = tabName;
+  const buttons = document.querySelectorAll('.tab-btn');
+  buttons.forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const contents = document.querySelectorAll('.tab-content');
+  contents.forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + tabName).classList.add('active');
+  updatePreview();
+}
+
+function calculateAllAiMetrics() {
+  const currency = "\$";
+  const rate = 1.00;
+
+  // 1. Cloud Input Parameters
+  const cloudSpendUSD = parseFloat(document.getElementById('cloud-spend').value) || 0;
+  const cloudGrowth = parseFloat(document.getElementById('cloud-growth').value) / 100;
+
+  // 2. Hardware & Quantization Parameters
+  const hwType = document.getElementById('hardware-base').value;
+  const quant = document.getElementById('quantization-level').value;
+
+  // Define memory footprint under target architecture (Llama-3-70B base)
+  let requiredVram = 140; 
+  if (quant === 'int4') requiredVram = 40;
+  else if (quant === 'int8') requiredVram = 75;
+
+  // 3. Infrastructure Taxes & Downside Risks
+  const devopsSalaryUSD = parseFloat(document.getElementById('devops-salary').value) || 0;
+  const powerCent = parseFloat(document.getElementById('power-cost').value);
+  const downtimeCostUSD = parseFloat(document.getElementById('downtime-cost').value) || 0;
+
+  const spec = hardwareSpecs[hwType];
+
+  // Calculate monthly utility footprint (TDP * 24h * 30d) + 40% HVAC tax
+  const kwhPerMonth = (spec.tdpWatts * 24 * 30) / 1000;
+  const monthlyPowerCostUSD = kwhPerMonth * (powerCent / 100) * 1.40;
+
+  // Total monthly operational expenditures (OPEX)
+  let monthlyOpexUSD = monthlyPowerCostUSD;
+  if (hwType === 'runpod') {
+    monthlyOpexUSD += 1200; // Fixed monthly Bare-Metal lease rate
+  }
+  monthlyOpexUSD += devopsSalaryUSD;
+
+  // Compounding cloud spend across 24-month horizon under growth scalar
+  let totalCloudCost24USD = 0;
+  let currentMonthlyCloudUSD = cloudSpendUSD;
+  for (let m = 1; m <= 24; m++) {
+    totalCloudCost24USD += currentMonthlyCloudUSD;
+    if (m === 12) currentMonthlyCloudUSD *= (1 + cloudGrowth);
+  }
+
+  const totalCapexUSD = spec.capexUSD;
+  const totalOpex24USD = monthlyOpexUSD * 24;
+  const totalLocalCost24USD = totalCapexUSD + totalOpex24USD;
+
+  // Net Infrastructure Savings & ROI
+  const netSavingsUSD = totalCloudCost24USD - totalLocalCost24USD;
+  const roiValue = totalLocalCost24USD > 0 ? (netSavingsUSD / totalLocalCost24USD) * 100 : 0;
+
+  // Amortization horizon schedules
+  const monthlyCloudAverageUSD = totalCloudCost24USD / 24;
+  const monthlySavingsUSD = monthlyCloudAverageUSD - monthlyOpexUSD;
+  const paybackMonths = monthlySavingsUSD > 0 && totalCapexUSD > 0 ? Math.ceil(totalCapexUSD / monthlySavingsUSD) : 0;
+
+  return {
+    vram: requiredVram + " GB",
+    power: "\$" + Math.round(monthlyPowerCostUSD).toLocaleString('en-US'),
+    capex: "\$" + Math.round(totalCapexUSD).toLocaleString('en-US'),
+    savings: "\$" + Math.round(netSavingsUSD).toLocaleString('en-US'),
+    roi: Math.round(roiValue),
+    payback: paybackMonths,
+    hwType: hwType,
+    quant: quant,
+    devops: devopsSalaryUSD,
+    downtime: downtimeCostUSD,
+    netSavingsUSD: netSavingsUSD
+  };
+}
+
+function updatePreview() {
+  const data = calculateAllAiMetrics();
+  if (!data) return;
+
+  let zone = "Autonomy Stable";
+  let color = "var(--success)";
+  let pct = 75;
+
+  if (data.netSavingsUSD < 0) {
+    zone = "Cloud Superiority (Negative ROI Matrix)";
+    color = "var(--danger)";
+    pct = 15;
+  } else if (data.quant === 'fp16' && data.hwType === 'rtx4090') {
+    zone = "Critical VRAM Depletion Warning";
+    color = "var(--accent)";
+    pct = 40;
+  } else if (data.payback > 0 && data.payback <= 6) {
+    zone = "Maximum Sovereign Leverage (Amortization < 6 Months)";
+    color = "var(--purple)";
+    pct = 95;
+  }
+
+  const preview = document.getElementById('live-preview-zone');
+  preview.innerText = zone; 
+  preview.style.color = color;
+
+  const fill = document.getElementById('bar-fill');
+  fill.style.width = pct + '%'; 
+  fill.style.background = color;
+
+  // Contextual asset swapping pipeline
+  const pLink = document.getElementById('partner-link');
+  if (pLink) {
+    if (data.hwType === 'mac') {
+      pLink.innerText = "🤖 Spin Up Mac Studio Node on Vast.ai";
+      pLink.href = "https://vast.ai";
+    } else {
+      pLink.innerText = "🤖 Deploy Sovereign Bare-Metal on RunPod";
+      pLink.href = "https://runpod.io";
+    }
+  }
+}
+
+window.onload = function() {
+  updatePreview();
+};
+
+function showAds() {
+  const c = document.getElementById('ads');
+  if (!window.adScriptLoaded) {
+    window.atOptions = {
+      'key': 'e8c895e6c70ade8e4ef4a72354f42e97',
+      'format': 'iframe',
+      'height': 90,
+      'width': 728,
+      'params': {}
+    };
+    var s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.async = !0;
+    s.src = ['https://', 'bagelstoppage.', 'com/', 'e8c895e6c70ade8e4ef4a72354f42e97/', 'invoke.js'].join('');
+    c.appendChild(s);
+    window.adScriptLoaded = !0;
+  }
+  c.style.display = 'flex';
+}
+
+function calculateAiMetrics() {
+  const data = calculateAllAiMetrics();
+  if (!data) return;
+
+  document.getElementById('res-vram').innerText = data.vram;
+  document.getElementById('res-power').innerText = data.power;
+  document.getElementById('res-capex').innerText = data.capex;
+  document.getElementById('res-savings').innerText = data.savings;
+  document.getElementById('res-roi').innerText = (data.roi > 0 ? "+" : "") + data.roi + "%";
+
+  const pRow = document.getElementById('payback-row');
+  if (data.payback > 0) {
+    document.getElementById('res-payback').innerText = data.payback + " mos.";
+    pRow.style.display = 'flex';
+  } else {
+    pRow.style.display = 'none';
+  }
+
+  let verdict = `Infrastructure audit verified. Migration of target AI workloads to a private sovereign hardware matrix is economically sound. Amortization horizon aligns with enterprise safety guidelines.`;
+  
+  if (data.netSavingsUSD < 0) {
+    verdict = `🚨 INFRASTRUCTURE COLLAPSE (NEGATIVE ROI): Your operating expenditures (OPEX) for systems engineering overhead, utility consumption, and server cooling surpass your baseline cloud invoices. Retain your managed Big Tech API keys.`;
+  } else if (data.quant === 'fp16' && data.hwType === 'rtx4090') {
+    verdict = `⚠️ CRITICAL OUT OF MEMORY (OOM) RISK: Attempting to deploy unquantized FP16 parameters onto a 4x RTX 4090 cluster will instantly crash the hardware node. The weights surpass physical VRAM boundaries (96 GB). Move the quantization slider to INT4.`;
+  } else if (data.devops === 0 && data.hwType !== 'mac') {
+    verdict = `❌ CRITICAL FAULT TOLERANCE WARNING: You have excluded internal engineering payroll. The instant a CUDA library conflicts or a PCIe lane hangs, your private node locks up. Every hour of downtime burns \$${data.downtime} of net revenue.`;
+  } else if (data.quant === 'int4') {
+    verdict = `🏴‍☠️ FULL TECH SOVEREIGNTY MODE (4-BIT): INT4 model parameter quantization compressed VRAM requirements by 75%. Your private hardware node fully amortizes capital costs inside a record window, completely shielding internal enterprise data.`;
+  }
+
+  document.getElementById('skynet-verdict').innerText = verdict;
+  document.getElementById('results-box').style.display = 'block';
+  document.getElementById('skynet-container').style.display = 'block';
+  updatePreview();
+  showAds();
+}
+</script>
+</body>
+</html>
